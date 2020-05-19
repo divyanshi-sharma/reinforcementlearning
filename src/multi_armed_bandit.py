@@ -59,7 +59,32 @@ class MultiArmedBandit:
             average reward over the first s steps, rewards[1] should contain
             the average reward over the next s steps, etc.
         """
-        raise NotImplementedError()
+        env.reset()
+        Q = np.zeros((env.observation_space.n, env.action_space.n))
+        N = np.zeros(env.action_space.n)
+        R = np.zeros(env.action_space.n)
+        rewards = np.zeros(100)
+        s = int(np.floor(steps / 100))
+        j = 1
+        while steps > 0:
+            prob = np.random.uniform(0,1)
+            if prob <= self.epsilon:
+                action = np.argmax(Q)
+            else:
+                action = np.random.randint(0, env.action_space.n)
+            observation, reward, done, info = env.step(action)
+            R[action] = reward
+            N[action] += 1
+            alpha = 1/N[action]
+            Q[observation, action] += alpha * (R[action] - Q[observation, action])
+            if np.mod(j, s) == 0:
+                index = int(j/s)
+                rewards[index-1] = np.sum(R)/s
+            j += 1
+            steps -= 1
+        state_action_values = Q
+        print(state_action_values.shape)
+        return state_action_values, rewards
 
     def predict(self, env, state_action_values):
         """
@@ -94,4 +119,19 @@ class MultiArmedBandit:
             over the course  of the episode. Should be of length K, where K is
             the number of steps taken within the episode.
         """
-        raise NotImplementedError()
+        r = np.zeros(env.action_space.n)
+        o = np.zeros(env.action_space.n)
+        rewards = np.array([])
+        actions = np.array([])
+        states = np.array([])
+        done = False
+        while done != True:
+            for i in range(env.observation_space.n):
+                index = np.argmax(state_action_values[i, :])
+                observation, reward, done, info = env.step(index)
+                rewards = np.append(rewards, reward)
+                actions = np.append(actions, index)
+                states = np.append(states, observation)
+        return states, actions, rewards
+
+
