@@ -86,10 +86,12 @@ class QLearning:
             R[observation, action] = reward
             N[state, action] += 1
             alpha = 1 / N[state, action]
-            Q[observation, action] += alpha * (R[state, action] + (1-self.discount) * (Q[observation, action] - Q[state, action]))
+            maxim = np.random.choice(np.where(Q[observation, :] == Q[observation, :].max())[0])
+            Q[state, action] += alpha * (R[observation, action] + (1-self.discount) * (Q[observation, maxim]) - Q[state, action])
             if np.mod(j, s) == 0:
                 index = int(j / s)
                 rewards[index - 1] = np.sum(R) / s
+                R = np.zeros((env.observation_space.n, env.action_space.n))
             j += 1
             new_steps -= 1
             state = observation
