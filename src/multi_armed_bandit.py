@@ -83,7 +83,6 @@ class MultiArmedBandit:
             j += 1
             steps -= 1
         state_action_values = Q
-        print(state_action_values.shape)
         return state_action_values, rewards
 
     def predict(self, env, state_action_values):
